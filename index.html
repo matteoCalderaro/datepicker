@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Range Picker Example</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts: Roboto for body and buttons, Lato for daterangepicker -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Date Range Picker CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif; /* Body font set to Roboto */
+            background-color: #f3f4f6; /* Light gray background */
+            display: block; /* Override flex */
+            min-height: auto; /* Override min-h-screen */
+            padding: 1rem; /* Add some padding to the body itself */
+        }
+        /* Custom styles for better integration with Tailwind */
+        .drp-calendar {
+            border-radius: 0.5rem; /* Rounded corners for the calendar */
+            /* Removed box-shadow */
+        }
+
+        /* Styling for active dates (start/end of range) - Matches Improvely Demo */
+        .daterangepicker td.active, .daterangepicker td.active:hover {
+            background-color: #3b82f6 !important;
+            border: none !important; /* Changed border to none */
+            color: #fff !important; /* Ensure text color is white */
+            border-radius: 0.25rem !important; /* Ensure subtle rounding */
+        }
+
+        /* Styling for dates within the selected range - Matches Improvely Demo */
+        .daterangepicker td.in-range {
+            background-color: #e0f2fe; /* Light blue-100 for range, softer */
+            border-color: transparent;
+            color: #1f2937; /* Dark gray text */
+            border-radius: 0; /* No rounding for middle dates */
+        }
+
+        /* CRUCIAL FIX: Ensure 'off' dates are never styled by our active/in-range rules.
+           They should appear as the library's default faded look. */
+        .daterangepicker td.off {
+            background-color: transparent !important;
+            border: none !important;
+            color: #cccccc !important; /* Light gray for faded dates */
+        }
+
+        /* Ensure that even if an 'off' date is also 'in-range' or 'active',
+           our custom styling for in-range/active is suppressed for it. */
+        .daterangepicker td.off.in-range,
+        .daterangepicker td.off.active {
+            background-color: transparent !important;
+            border: none !important;
+            color: #cccccc !important; /* Maintain faded text color */
+        }
+
+        /* Ensure the ranges column is visible and styled correctly */
+        .daterangepicker .ranges {
+            float: right; /* Changed float to right */
+            margin: 4px;
+            text-align: left;
+            margin-left: 20px; /* Add margin to separate from calendars */
+        }
+        .daterangepicker .ranges ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            width: 160px; /* Adjust width as needed */
+        }
+        .daterangepicker .ranges li {
+            font-size: 12px; /* Adjusted: Smaller font size */
+            padding: 5px 10px; /* Adjusted: Reduced padding to match smaller font */
+            margin-bottom: 2px; /* Adjusted: Reduced space between items */
+            cursor: pointer;
+            border-radius: 0.375rem; /* rounded-md */
+            transition: background-color 0.2s ease-in-out;
+            font-weight: bold; /* Made font bolder */
+            color: #3b82f6; /* Primary blue color when not selected */
+        }
+        .daterangepicker .ranges li:hover {
+            background-color: #e5e7eb; /* gray-100 */
+        }
+        .daterangepicker .ranges li.active {
+            background-color: #3b82f6; /* blue-500 */
+            color: #fff; /* White when active */
+        }
+
+        /* Styling for Apply/Cancel buttons - Matches Improvely Demo */
+        .daterangepicker .drp-buttons {
+            text-align: right;
+            padding: 8px;
+            border-top: 1px solid #e5e7eb; /* Light gray border */
+        }
+        .daterangepicker .drp-buttons .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem; /* Adjusted: Slightly reduced font size from 0.875rem */
+            letter-spacing: 0.025em; /* NEW: Added slightly higher letter spacing */
+            border-radius: 0.375rem; /* rounded-md */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-family: 'Roboto', sans-serif; /* Apply Roboto font */
+            text-transform: uppercase; /* Make text uppercase */
+        }
+        .daterangepicker .drp-buttons .btn-primary {
+            background-color: #3b82f6; /* Blue-500 */
+            color: #fff;
+            border: 1px solid #3b82f6;
+            margin-left: 0.5rem; /* Space between buttons */
+        }
+        .daterangepicker .drp-buttons .btn-primary:hover {
+            background-color: #2563eb; /* Blue-600 */
+            border-color: #2563eb;
+        }
+        .daterangepicker .drp-buttons .btn-default {
+            background-color: #fff;
+            color: #4b5563; /* Gray-700 */
+            border: 1px solid #d1d5db; /* Gray-300 */
+        }
+        .daterangepicker .drp-buttons .btn-default:hover {
+            background-color: #f3f4f6; /* Gray-100 */
+            border-color: #9ca3af; /* Gray-400 */
+        }
+
+        /* Corrected margin for clear separation */
+        .daterangepicker .calendar.left {
+            margin-right: 20px; /* Set margin-right as requested */
+            margin-left: 0; /* Ensure no conflicting left margin */
+            float: left; /* Ensure calendars float left */
+        }
+        .daterangepicker .calendar.right {
+            float: left; /* Ensure right calendar floats left */
+        }
+
+        /* Override specific border from the library's CSS */
+        .daterangepicker.show-ranges.ltr .drp-calendar.left {
+            border-left: none !important; /* Explicitly remove the border */
+        }
+
+        /* Apply Lato font to the daterangepicker container itself */
+        .daterangepicker {
+            font-family: 'Lato', sans-serif; /* Ensure Lato is applied to the entire picker */
+        }
+    </style>
+</head>
+<body>
+    <div class="p-4">
+        <label for="date_range" class="block text-gray-700 text-sm font-medium mb-2">Date Range:</label>
+        <input type="text" id="date_range" name="date_range"
+               class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-400"
+               placeholder="Click to select a date range">
+    </div>
+
+    <!-- jQuery CDN (required by Date Range Picker) -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <!-- Moment.js CDN (required by Date_Range Picker) -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/moment/moment.min.js"></script>
+    <!-- Date Range Picker JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+    <script type="text/javascript">
+        $(function() {
+            // Get today's date using Moment.js
+            let today = moment();
+
+            // Select the input field by its ID
+            $('#date_range').daterangepicker({
+                startDate: today, // Set start date to today
+                endDate: today,   // Set end date to today
+                locale: {
+                    format: 'DD/MM/YYYY',
+                    firstDay: 1 // Set Monday as the first day of the week (0 is Sunday, 1 is Monday)
+                },
+                alwaysShowCalendars: true,
+                opens: 'right',
+                drops: 'down',
+                autoUpdateInput: false, // Keep this false to control updates manually
+                ranges: {
+                   'Today': [moment(), moment()],
+                   'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                   'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                   'Last 31 Days': [moment().subtract(30, 'days'), moment()],
+                   'Current Week': [moment().startOf('week'), moment().endOf('week')],
+                   'Previous Week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+                   'Current Month': [moment().startOf('month'), moment().endOf('month')],
+                   'Previous Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                }
+            }, function(start, end, label) {
+                // Callback function when a date range is applied
+                // Always update the input field with the formatted dates
+                $('#date_range').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (Label: ' + label + ')');
+            });
+
+            // Handle the 'cancel.daterangepicker' event to clear the input when the cancel button is clicked
+            $('#date_range').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+            });
+
+            // Set the input field value to today's date range on page load
+            $('#date_range').val(today.format('DD/MM/YYYY') + ' - ' + today.format('DD/MM/YYYY'));
+        });
+    </script>
+</body>
+</html>
